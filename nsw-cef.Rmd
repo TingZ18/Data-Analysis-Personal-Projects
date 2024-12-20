@@ -128,11 +128,6 @@ ggplot(dfpie, aes(x = "", y = values, fill = ind)) +
   theme_void() +
   theme(legend.position = "none") -> p_pie
 
-setwd("/Users/zhangting/Downloads/R/R program")
-ggsave("pieplot.png")
-dfima <- df %>%
-  mutate(image = "/Users/zhangting/Downloads/R/R program/pieplot.png")
-
 ggplot(dfima, aes(group, pop)) +
   geom_bar(stat = "identity", fill = "#EFC000FF") + 
   coord_cartesian(ylim = c(8000000, 8500000)) +
@@ -152,5 +147,10 @@ p_main + p_2 + p_leg + plot_layout(
     area(1,11,8,12)
   )
 ) 
+
+setwd("/Users/zhangting/Downloads/R/R program")
+ggsave("pieplot.png")
+dfima <- df %>%
+  mutate(image = "/Users/zhangting/Downloads/R/R program/pieplot.png")
 
 ```

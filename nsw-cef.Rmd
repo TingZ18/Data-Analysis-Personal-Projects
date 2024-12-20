@@ -149,7 +149,7 @@ p_main + p_2 + p_leg + plot_layout(
 ) 
 
 setwd("/Users/zhangting/Downloads/R/R program")
-ggsave("pieplot.png")
+ggsave("ima.png")
 dfima <- df %>%
   mutate(image = "/Users/zhangting/Downloads/R/R program/pieplot.png")
 

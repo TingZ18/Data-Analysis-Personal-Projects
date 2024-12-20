@@ -1,0 +1,156 @@
+---
+title: "RECENT ECONOMIC INDICATORS"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r fig.dim = c(10,8), out.width = "250%"}
+library(dplyr)
+
+library(ggplot2)
+library(hrbrthemes) # them_ipsum()
+library(ggpubr) # get_legend()
+library(ggimage) # geom_image()
+library(patchwork)
+
+df <- data.frame(
+  group = c("2021-22", "2022-23"),
+  GSP = c(2.6, 3.7),
+  growth = c(2.5, 1.9),
+  AUD = c(706732, 777299),
+  GDPpro = c(30.3, 30.3),
+  pop = c(8101223, 8243268),
+  change = c(3.8, 4.1),
+  unem = c(5.1, 3.5)
+)
+
+colors <- c("Real Gross State Product (GSP) growth (%)" = "blue", 
+            "Real GSP per head growth (%)" = "lightblue", 
+            "GSP (current prices) (A$m)" = "navy",
+            "Proportion of Australian GDP (%)" = "orange",
+            "Estimated resident population (December)" = "pink",
+            "Change in real final demand (%)" = "green",
+            "Unemployment rate (%) (average)" = "yellow")
+
+ggplot(df, aes(x = group)) +
+  
+  geom_bar(aes(y = AUD), stat = "identity", fill = "red") +
+  geom_line(aes(y = GSP * 100000, group = 1, color = "Real Gross State Product (GSP) growth (%)"), size = 2) +
+  geom_line(aes(y = growth * 100000, group = 1, color = "Real GSP per head growth (%)"), size = 2) +
+  #geom_line(aes(y = GDPpro * 100000, group = 1, color = "Proportion of Australian GDP (%)"), size = 2) +
+  geom_line(aes(y = change * 100000, group = 1, color = "Change in real final demand (%)"), size = 2) +
+  geom_line(aes(y = unem * 100000, group = 1, color = "Unemployment rate (%) (average)"), size =2) +
+  scale_y_continuous(
+   # limits = c(500000, 80000),
+    name = "GSP (current prices) (A$m)",
+    labels = scales::comma,
+    sec.axis = sec_axis(~./100000, name = "Percent (%)")
+  ) +
+  
+  labs(x = "", color = "Percent (%)") +
+  scale_color_manual(values = colors) +
+
+  theme_ipsum() +
+  
+  theme(
+    axis.title.y = element_text(color = "red", size=13),
+    axis.title.y.right = element_text(color = "black", size=13),
+    legend.justification = "top",
+    #legend.position = "none",
+    legend.title = element_text(face = "bold"),
+    plot.margin = unit(c(1,.1,1,1), "cm")
+  ) +
+  
+  ggtitle("Recent economic indicators") -> p_main
+
+p_leg <- as_ggplot(get_legend(p_main)) + theme(plot.margin = unit(c(1,1,1,.1), "cm"))
+
+ggplot(df, aes(x = group)) +
+  
+  geom_bar(aes(y = AUD), stat = "identity", fill = "red") +
+  geom_line(aes(y = GSP * 100000, group = 1, color = "Real Gross State Product (GSP) growth (%)"), size = 2) +
+  geom_line(aes(y = growth * 100000, group = 1, color = "Real GSP per head growth (%)"), size = 2) +
+  #geom_line(aes(y = GDPpro * 100000, group = 1, color = "Proportion of Australian GDP (%)"), size = 2) +
+  geom_line(aes(y = change * 100000, group = 1, color = "Change in real final demand (%)"), size = 2) +
+  geom_line(aes(y = unem * 100000, group = 1, color = "Unemployment rate (%) (average)"), size =2) +
+  scale_y_continuous(
+   # limits = c(500000, 80000),
+    name = "GSP (current prices) (A$m)",
+    labels = scales::comma,
+    sec.axis = sec_axis(~./100000, name = "Percent (%)")
+  ) +
+  
+  labs(x = "", color = "Percent (%)") +
+  scale_color_manual(values = colors) +
+
+  theme_ipsum() +
+  
+  theme(
+    axis.title.y = element_text(color = "red", size=13),
+    axis.title.y.right = element_text(color = "black", size=13),
+    legend.justification = "top",
+    legend.position = "none",
+    legend.title = element_text(face = "bold"),
+    plot.margin = unit(c(1,.1,1,1), "cm")
+  ) +
+  
+  ggtitle("Recent economic indicators") -> p_main
+
+ggplot(df, aes(x = group, y = pop)) + 
+  geom_bar(stat = "identity", fill = "#EFC000FF") +
+  coord_cartesian(ylim = c(8000000, 8400000)) +
+  scale_y_continuous(labels = scales::comma) + 
+  annotate("text", x = 1.5, y = 8.37e+6, label = 'atop(bold("Proportion of Australian GDP (%)"))', size = 3, color = "#CD534CFF", parse = TRUE) +
+  labs(x = "", y = "Estimated resident population (December)") +
+  theme_ipsum() +
+  theme(
+    axis.title.y = element_text(color = "#EFC000FF", size = 13)
+    ) -> p_bar
+
+dfpie <- df %>%
+  select(group, GDPpro) %>%
+  mutate(pro = 100-GDPpro) %>%
+  stack(-1) %>% 
+  mutate(ind = factor(ind, levels = c("pro", "GDPpro"))) %>%
+  distinct() %>%
+  mutate(lab.ypos = cumsum(values) - 0.5*values)
+
+ggplot(dfpie, aes(x = "", y = values, fill = ind)) +
+  geom_bar(stat="identity", width=1, color = "#CD534CFF") +
+  coord_polar("y", start=0) +
+  geom_text(aes(y = c(lab.ypos[1],NA), label = "NSW\n30.3%"), color = "white", size = 15) + # size = 2.5
+  scale_fill_manual(values = c("white","#CD534CFF")) +
+  theme_void() +
+  theme(legend.position = "none") -> p_pie
+
+setwd("/Users/zhangting/Downloads/R/R program")
+ggsave("pieplot.png")
+dfima <- df %>%
+  mutate(image = "/Users/zhangting/Downloads/R/R program/pieplot.png")
+
+ggplot(dfima, aes(group, pop)) +
+  geom_bar(stat = "identity", fill = "#EFC000FF") + 
+  coord_cartesian(ylim = c(8000000, 8500000)) +
+  scale_y_continuous(labels = scales::comma) + 
+  annotate("text", x = 1.5, y = 8.45e+6, label = 'atop(bold("Proportion of Australian GDP (%)"))', size = 5, color = "#CD534CFF", parse = TRUE) +
+  labs(x = "", y = "Estimated resident population (December)") +
+  theme_ipsum() +
+  theme(
+    axis.title.y = element_text(color = "#EFC000FF", size = 13)
+  ) +
+  ggimage::geom_image(aes(image = image, y = mean(pop)*1.022), size = .4) -> p_2
+
+p_main + p_2 + p_leg + plot_layout(
+  design = c(
+    area(1,1,30,10),
+    area(8,11,30,18),
+    area(1,11,8,12)
+  )
+) 
+
+```

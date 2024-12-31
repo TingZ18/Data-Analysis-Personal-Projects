@@ -43,7 +43,6 @@ select * from bike where Occupation like 'Man%';
 update bike set Occupation = Trim(TRAILING '.' FROM Occupation);
 
 -- date/timestamp column
-alter table londonbike rename london_bike;
 drop table london;
 create table london like london_merged;
 insert into london select * from london_merged;
@@ -66,8 +65,11 @@ update bike set `Marital Status` = 'Single' where ID = 14939 and `Marital Status
 -- drop rows with confidence
 
 -- 5. remove useless columns
+-- alter table X drop column x;
 
 
-
-
-
+-- copy table
+alter table londonbike rename london_sale;
+create table sale
+select * from london_sale;
+select * from sale;

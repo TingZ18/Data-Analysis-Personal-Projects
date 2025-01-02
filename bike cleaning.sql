@@ -154,7 +154,7 @@ select * from temp_tri2;
 
 
 
--- event
+-- 13. event
 drop table if exists temp_tri1;
 create table temp_tri1 select ID, gender, education from bike where ID < 11050;
 
@@ -171,6 +171,30 @@ delimiter ;
 
 select * from temp_tri1;
 show variables like 'event%'; -- event_scheduler ON
+
+
+
+-- 14. view-stored select statement: could hide sensitive data, update correspondingly...
+show full tables where table_type like 'VIEW';
+
+drop table if exists bike_temp;
+create table bike_temp
+select id, education, occupation, income
+from bike
+where gender = 'Male';
+
+drop view if exists bike_view;
+create view bike_view as
+select *, 'High income'
+from bike_temp
+where income > 150000
+union
+select *, 'Low income'
+from bike_temp
+where income < 20000;
+
+delete from bike_temp where income = 10000;
+select * from bike_view;
 
 
 

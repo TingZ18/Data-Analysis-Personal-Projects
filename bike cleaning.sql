@@ -1,5 +1,6 @@
 SELECT * FROM bike.bike_buyers;
 USE bike;
+alter table sale rename bike;
 
 -- 1. create new table for data manipulation
 create table bike like bike_buyers;
@@ -90,7 +91,7 @@ call tab3();
 
 drop procedure if exists arg;
 delimiter $$
-create procedure arg(IN num int, OUT ma char, fe int)
+create procedure arg(IN num int, OUT ma int, OUT fe int)
 begin
 	select count(*) into ma from bike
     where ID = num and gender = 'Male';
@@ -111,21 +112,43 @@ end $$
 delimiter ;
 call arg2('Male,'); -- 'Male' and ''
 
--- another way to pass multiple values: 
+-- another way to pass multiple string values:
+drop procedure if exists edu;
+delimiter //
+CREATE PROCEDURE edu (IN edu_p VARCHAR(500))
+BEGIN
+    SET @sql_con = CONCAT('select Education, count(*) as cnt_edu
+							from bike
+							where education in (', edu_p, ')
+                            group by education
+                            order by education');
+    PREPARE stmt FROM @sql_con;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+delimiter ;
+
+select distinct education from bike;
+call edu("'Bachelors', 'High School', 'Graduate Degree'"); -- ignore upper or lower case
+
+-- multiple decimal values: 
 -- put the rows in a temporary table and pass in its name
 drop procedure if exists temp_p;
 delimiter go
 create procedure temp_p()
 begin
-	select temp_t.ID, temp_t.gender, bike.ID, bike.gender from temp_t
+	select temp_t.ID, temp_t.gender, bike.ID, bike.gender 
+    from temp_t
     join bike
     on temp_t.ID = bike.ID + 1;
 end go
 delimiter ;
+
 drop temporary table if exists temp_t;
 create temporary table temp_t
 select * from bike
 where ID < 12000;
+
 call temp_p();
 
 
@@ -308,5 +331,6 @@ select * from temp2;
 insert into temp2
 values("ting", 3, "01:09:13");
 
--- check column type
+-- check column
 SHOW COLUMNS FROM temp2 FROM bike;
+select CHARACTER_MAXIMUM_LENGTH from information_schema.columns where column_name like 'gender%';

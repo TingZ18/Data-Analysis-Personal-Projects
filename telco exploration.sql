@@ -108,18 +108,42 @@ drop temporary table if exists sco_ran;
 create temporary table sco_ran as 
 select * 
 from status_analysis 
-where churn_score > 50;
+where churn_score > 50; 
 
 call pro();
 
--- trigger
+-- 6. summing total revenue newly inserted into the payment table
+drop trigger if exists pay_sum;
+create trigger pay_sum before insert on payment_info
+for each row set @rev_sum = @rev_sum + new.total_revenue;
+set @rev_sum = (select sum(total_revenue) from payment_info);
 
+insert into payment_info (customer_id, total_revenue) values ('0099-GWOEG', 20000), ('0293-RWIOE', 30000);
+select @rev_sum as 'total revenue';
 
+delete from payment_info where total_revenue in (20000,30000);
 
+-- 7. update customer list under 20;
+drop table if exists cus_age;
+create temporary table cus_age
+select customer_id, gender, age
+from customer_info 
+where age < 20;
 
+drop trigger if exists cus_add;
+delimiter %%
+create trigger cus_add 
+after insert on customer_info
+for each row 
+begin
+	if new.age < 20 then
+		insert into cus_age values (new.customer_id, new.gender, new.age);
+	end if;
+end %%
+delimiter ;
 
--- event
+insert into customer_info (customer_id, gender, age) values ('8883-WERWI', 'Male', 100), ('2304-WIERW', 'Female', 18);
+select * from cus_age;
 
-
-
+delete from customer_info where age in (18, 100);
 

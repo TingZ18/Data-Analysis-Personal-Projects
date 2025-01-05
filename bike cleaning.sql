@@ -334,3 +334,7 @@ values("ting", 3, "01:09:13");
 -- check column
 SHOW COLUMNS FROM temp2 FROM bike;
 select CHARACTER_MAXIMUM_LENGTH from information_schema.columns where column_name like 'gender%';
+alter table bike.london rename column cnt to ttt; -- alter table bike.london rename column ttt to cnt;
+
+-- limit
+select * from bike.london limit 5 offset 3; -- from 4 to 8

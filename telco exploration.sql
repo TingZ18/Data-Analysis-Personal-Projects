@@ -123,7 +123,7 @@ select @rev_sum as 'total revenue';
 
 delete from payment_info where total_revenue in (20000,30000);
 
--- 7. update customer list under 20;
+-- 7. update customer list under 20 years;
 drop table if exists cus_age;
 create temporary table cus_age
 select customer_id, gender, age
